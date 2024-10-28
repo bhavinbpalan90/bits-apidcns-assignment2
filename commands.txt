@@ -4,3 +4,8 @@ conda activate bitsApi
 conda install pandas
 conda install numpy faker
 pip install sqllite3
+conda install requests
+conda install openai
+
+
+pip install python-dotenv

@@ -9,7 +9,10 @@ import sqlite3
 faker = Faker()
 
 # Constants
-num_records = 1000
+num_records = 100
+
+pd.set_option('display.max_columns', None)
+
 
 # Define 20 different product names, categories, and descriptions
 product_data = {
@@ -150,8 +153,8 @@ def qry_sqlLite(qry):
 
 
 # Generate the dataset
-#synthetic_dataset = generate_order_data(num_records)
-#write_to_sqlLite(synthetic_dataset)
+synthetic_dataset = generate_order_data(num_records)
+write_to_sqlLite(synthetic_dataset)
 
 df_output = qry_sqlLite('SELECT * FROM orders_data limit 10')
 print(df_output.head())
