@@ -1,0 +1,6 @@
+conda create --name bitsApi
+conda activate bitsApi
+
+conda install pandas
+conda install numpy faker
+pip install sqllite3
