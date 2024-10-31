@@ -31,14 +31,14 @@ This Project is designed to respond User Inputs for a search of data from databa
 
 2. **Setup Conda Environment & Packages**
 
-conda create --name <envName>
-conda activate <envName>
+    conda create --name <envName>
+    conda activate <envName>
 
-pip install -r requirements.txt
+    pip install -r requirements.txt
 
 ## Usage
 
 1. **Execute Python to get Response**
 
-modify the question in main.py 
-execute python main.py
+    Sample question in main.py 
+    execute python main.py
