@@ -38,7 +38,12 @@ This Project is designed to respond User Inputs for a search of data from databa
 
 ## Usage
 
-1. **Execute Python to get Response**
+1. **Update OpenAI API Key before Proceeding further**
 
-    Sample question in main.py 
-    execute python main.py
+    1. Login in Open AI Platform to generate the API Key.
+    2. Update the key in .env file in the placeholder.
+
+2. **Execute Python to get Response**
+
+    1. Modify Sample question in main.py (Please be aware of the data in bits.db)
+    2. execute python main.py
