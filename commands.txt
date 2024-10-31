@@ -7,5 +7,8 @@ pip install sqllite3
 conda install requests
 conda install openai
 
+conda install transformers
+conda install pytorch
 
 pip install python-dotenv
+pip install sentencepiece

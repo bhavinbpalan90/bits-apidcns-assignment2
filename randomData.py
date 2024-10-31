@@ -12,6 +12,8 @@ faker = Faker()
 num_records = 100
 
 pd.set_option('display.max_columns', None)
+pd.set_option('display.max_colwidth', None)
+
 
 
 # Define 20 different product names, categories, and descriptions
@@ -138,9 +140,25 @@ def generate_order_data(num_records):
     
     return pd.DataFrame(records)
 
-def write_to_sqlLite(dataset):
+# Function to add synthetic fields to each product
+def generate_synthetic_product_data(product_data,recordsCount):
+    products = []
+    for name, details in product_data.items():
+        product = {
+            "product_name": name,
+            "product_category": details["category"],
+            "product_description": details["description"],
+            "product_price": round(random.uniform(5.0, 500.0), 2),
+            "product_in_stock": faker.boolean(chance_of_getting_true=70),
+            "product_rating": round(random.uniform(1.0, 5.0), 1)
+        }
+        products.append(product)
+    return pd.DataFrame(products)
+
+
+def write_to_sqlLite(dataset,tableName):
     conn = sqlite3.connect('bits.db')  # Change the name as needed
-    dataset.to_sql('orders_data', conn, if_exists='replace', index=False)
+    dataset.to_sql(tableName, conn, if_exists='replace', index=False)
     conn.close()
     return 'Completed'
 
@@ -152,9 +170,30 @@ def qry_sqlLite(qry):
     return df
 
 
-# Generate the dataset
-synthetic_dataset = generate_order_data(num_records)
-write_to_sqlLite(synthetic_dataset)
+def generateSyntheticDate():
+    # Generate the dataset
+    synthetic_order_dataset = generate_order_data(num_records)
+    write_to_sqlLite(synthetic_order_dataset,'ORDER_DATA')
 
-df_output = qry_sqlLite('SELECT * FROM orders_data limit 10')
+    # Generate the dataset
+    synthetic_product_dataset = generate_synthetic_product_data(product_data,num_records)
+    write_to_sqlLite(synthetic_product_dataset,'PRODUCT_DATA')
+
+
+# Generate Synthetic Data
+# generateSyntheticDate()
+
+df_output = qry_sqlLite("SELECT order_date, order_number, product_name FROM order_data WHERE order_number = '89086'")
 print(df_output.head())
+
+"""
+df_output = qry_sqlLite("
+                        SELECT sql FROM sqlite_master WHERE type = 'table' AND name = 'PRODUCT_DATA'
+                        "
+                        )
+print(df_output.head())
+
+## CREATE TABLE ORDER_DATA (customer_id INTEGER,customer_name TEXT, customer_email TEXT,customer_phone_number TEXT,order_number INTEGER,order_date DATE,product_name TEXT,product_category TEXT,product_description TEXT,order_quantity INTEGER,total_order_value INTEGER,order_delivery_status TEXT)
+## CREATE TABLE "PRODUCT_DATA (  product_name TEXT, product_category TEXT, product_description TEXT, product_price REAL, product_in_stock INTEGER, product_rating REAL)
+
+"""
