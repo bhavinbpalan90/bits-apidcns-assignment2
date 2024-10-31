@@ -69,11 +69,4 @@ def query_llm(question):
     
     return response.choices[0].message.content
 
-# Example question
-#question = "Could you please provide the list of Products that are available in stock ?"
-#question = "Could you please provide the Order status for order number 89086"
-question = "Could you please provide the Product Price for Wireless Headphones ?"
-print("Input Question is: ", question)
-answer = query_llm(question)
 
-print(answer)
