@@ -9,9 +9,6 @@ Purpose of this Utility is to search the data from the Database and Respond in a
 - [Features](#features)
 - [Installation](#installation)
 - [Usage](#usage)
-- [Configuration](#configuration)
-- [Contributing](#contributing)
-- [License](#license)
 
 ---
 
@@ -32,6 +29,8 @@ This Project is designed to respond User Inputs for a search of data from databa
    git clone https://github.com/bhavinbpalan90/text-to-db-search.git
    cd text-to-db-search
 
-2. **Execute Python to get Response**
+## Usage
 
-    execute main.py
+1. **Execute Python to get Response**
+
+    modify the question in main.py and execute main.py
