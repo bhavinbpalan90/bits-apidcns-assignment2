@@ -41,7 +41,8 @@ This Project is designed to respond User Inputs for a search of data from databa
 1. **Update OpenAI API Key before Proceeding further**
 
     1. Login in Open AI Platform to generate the API Key.
-    2. Update the key in .env file in the placeholder.
+    2. Login into hugging Face Platform to get API Key
+    3. Update the relevant key in .env file in the placeholder specificed for each of it.
 
 2. **Execute Python to get Response**
 
