@@ -1,0 +1,8 @@
+pandas
+numpy 
+faker
+sqllite3
+requests
+openai
+python-dotenv
+sentencepiece

@@ -29,8 +29,16 @@ This Project is designed to respond User Inputs for a search of data from databa
    git clone https://github.com/bhavinbpalan90/text-to-db-search.git
    cd text-to-db-search
 
+2. **Setup Conda Environment & Packages**
+
+conda create --name <envName>
+conda activate <envName>
+
+pip install -r requirements.txt
+
 ## Usage
 
 1. **Execute Python to get Response**
 
-    modify the question in main.py and execute main.py
+modify the question in main.py 
+execute python main.py
