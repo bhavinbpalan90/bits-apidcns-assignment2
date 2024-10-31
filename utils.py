@@ -4,10 +4,13 @@ from openai import OpenAI
 import os
 from dotenv import dotenv_values
 import sqlite3
+from huggingface_hub import InferenceClient
+
 config = dotenv_values(".env")
 
 # Access the API key
 openApiKey = config['OPENAI_API_KEY']  # Use the key name you defined in the .env file
+huggingFaceKey = config['HUGGINGFACE_API_KEY']
 
 def qry_sqlLite(qry):
     conn = sqlite3.connect('bits.db')  # Change the name as needed
@@ -69,4 +72,29 @@ def query_llm(question):
     
     return response.choices[0].message.content
 
+def query_slm(question):
+    finalQuestion = 'From the list of Entity (Orders, Product,Feedback), Identify Entity for the user question ' + str(question) + ' . Respond only with Entity Name and nothing else.'
 
+    messages = [
+	{ "role": "user", "content": finalQuestion }
+    ]
+
+    client = InferenceClient(api_key=str(huggingFaceKey))
+    stream = client.chat.completions.create(
+    model="microsoft/Phi-3.5-mini-instruct", 
+	messages=messages, 
+	max_tokens=500,
+	stream=True
+    )
+
+    # Initialize an empty string to collect the responses
+    complete_response = ""
+
+    # Iterate over the streamed chunks
+    for chunk in stream:
+        # Append the content of each chunk to the complete response
+        complete_response += chunk.choices[0].delta.content
+
+    # Print the combined response
+    #print(complete_response)
+    return complete_response
