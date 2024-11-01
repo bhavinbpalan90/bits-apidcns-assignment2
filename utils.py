@@ -28,7 +28,7 @@ def getTextToSQL(question):
     
     
     # Formulate the prompt
-    prompt = f"Based on the following Table Schema :\n{tableSchema}\n\nCan you generate a single SQL for SQLlite for this question: {question}?. If Question is related to Product, Respond from Product Table and include Product Name. if Question is related to Orders data, always include columns Order Date, Order Number and Product Name"
+    prompt = f"Based on the following Table Schema :\n{tableSchema}\n\nCan you generate a single SQL for SQLlite for this question: {question}?. If Question is related to Product, Respond from Product Table and include Product Name. if Question is related to Orders data, always include columns Order Date, Order Number and Product Name. When generating SQL for product_name in where clause, try to be case insensitive and for multi-word input of product_name, try to search for each of the work if found. Always generate only 1 SQL statement"
     
     # Call the LLM using the new API
     response = client.chat.completions.create(
@@ -62,7 +62,7 @@ def query_llm(question):
     relevant_data = df_filtered_rows.to_string(index=False)
 
     # Formulate the prompt
-    prompt = f"Based on the following data:\n{relevant_data}\n\nCan you answer this question: {question}?. Generate Response in a Human Friendly way. Include Order Number and Product Name if it is available"
+    prompt = f"Based on the following data:\n{relevant_data}\n\nCan you answer this question: {question}?. Generate Response in a Human Friendly way. Include Order Number and Product Name if it is available."
     
     # Call the LLM using the new API
     response = client.chat.completions.create(
@@ -73,7 +73,7 @@ def query_llm(question):
     return response.choices[0].message.content
 
 def query_slm(question):
-    finalQuestion = 'From the list of Entity (Orders, Product,Feedback), Identify Entity for the user question ' + str(question) + ' . Respond only with Entity Name and nothing else.'
+    finalQuestion = 'From the list of Entity (Orders, Product,Feedback, Product Setup), Identify Entity for the user question ' + str(question) + ' . Respond only with Entity Name and nothing else.'
 
     messages = [
 	{ "role": "user", "content": finalQuestion }
@@ -98,3 +98,33 @@ def query_slm(question):
     # Print the combined response
     #print(complete_response)
     return complete_response
+
+# Function to query the LLM
+def query_fineTunellm(question):
+
+    client = OpenAI(api_key=openApiKey)
+
+    prompt = question
+
+    # Formulate the prompt
+    #prompt = f"Based on the following data:\n{relevant_data}\n\nCan you answer this question: {question}?. Generate Response in a Human Friendly way. Include Order Number and Product Name if it is available"
+    
+    # Call the LLM using the new API
+    response = client.chat.completions.create(
+        model="ft:gpt-4o-mini-2024-07-18:personal:finetune-product-setup-v1:AOnNMrdm",
+        messages=[{"role": "user", "content": prompt}]
+    )
+    
+    return response.choices[0].message.content
+
+def getResponse(question):
+
+    finalResponse = ''
+    entityName = query_slm(question)
+    #print('Entity Name:' , entityName)
+    if entityName.strip() == 'Orders' or entityName.strip() == 'Product':
+        finalResponse = query_llm(question)
+    else:
+        finalResponse = query_fineTunellm(question)
+    
+    return finalResponse
