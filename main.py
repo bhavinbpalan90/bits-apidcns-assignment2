@@ -15,7 +15,7 @@ answer = utils.getResponse(question)
 print(answer)
 
 
-question = "Could you please provide the Order status for order number 89086"
+question = "Could you tell me order number 89086"
 print("Input Question is: ", question)
 answer = utils.getResponse(question)
 print(answer)

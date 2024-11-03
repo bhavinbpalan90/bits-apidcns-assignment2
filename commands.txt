@@ -12,3 +12,4 @@ conda install pytorch
 
 pip install python-dotenv
 pip install sentencepiece
+pip install huggingface_hub

@@ -28,7 +28,7 @@ def getTextToSQL(question):
     
     
     # Formulate the prompt
-    prompt = f"Based on the following Table Schema :\n{tableSchema}\n\nCan you generate a single SQL for SQLlite for this question: {question}?. If Question is related to Product, Respond from Product Table and include Product Name. if Question is related to Orders data, always include columns Order Date, Order Number and Product Name. When generating SQL for product_name in where clause, try to be case insensitive and for multi-word input of product_name, try to search for each of the work if found. Always generate only 1 SQL statement"
+    prompt = f"Based on the following Table Schema :\n{tableSchema}\n\nCan you generate a single SQL for SQLlite for this question: {question}?. Only query from one table. If Question is related to Product, Respond from Product Table and include Product Name. if Question is related to Orders data, always include columns Order Date, Order Number, Order Status and Product Name. When generating SQL for product_name in where clause, try to be case insensitive and for multi-word input of product_name, try to search for each of the work if found. Always generate only 1 SQL statement"
     
     # Call the LLM using the new API
     response = client.chat.completions.create(
