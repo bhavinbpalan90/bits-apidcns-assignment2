@@ -41,9 +41,9 @@ classifier = pipeline("text-classification", model='dkkh8788/finetuned_classific
 def generate_response(feedback, sentiment):
 
     if sentiment == "POSITIVE":
-        prompt = f"Generate an appropriate positive response in maximum 25 words to the customer thanking and expressing gratitude."
+        prompt = f"Generate an appropriate positive response in maximum 50 words to the customer thanking and expressing gratitude."
     else:
-        prompt = f"Generate an appropriate empathetic response in maximum 25 words to the customer apologizing for the inconvenience and offering assistance."
+        prompt = f"Generate an appropriate empathetic response in maximum 50 words to the customer apologizing for the inconvenience and offering assistance."
 
     messages = [
         { "role": "assistant", "content": f"{feedback}\n\nQuestion: {prompt}" },
