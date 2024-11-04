@@ -25,15 +25,16 @@ import pyttsx3
 from gtts import gTTS
 import playsound
 import os
+from openai import OpenAI
 
 # Initialize the translator
 #translator = Translator()
 
-
- 
 # Replace with your API Key
+# Set your OpenAI API key
+openapi_api_key = "XXXXX"
 
-client = InferenceClient(api_key="hf_XXXXXXXXXXX")
+client = InferenceClient(api_key="hf_XXXXXX")
 
 classifier = pipeline("text-classification", model='dkkh8788/finetuned_classification_model_v3',
                       tokenizer='dkkh8788/finetuned_classification_model_v3', device='mps')
@@ -41,9 +42,9 @@ classifier = pipeline("text-classification", model='dkkh8788/finetuned_classific
 def generate_response(feedback, sentiment):
 
     if sentiment == "POSITIVE":
-        prompt = f"Generate an appropriate positive response in maximum 50 words to the customer thanking and expressing gratitude."
+        prompt = f"Generate an appropriate positive response in maximum 30 words to the customer thanking and expressing gratitude."
     else:
-        prompt = f"Generate an appropriate empathetic response in maximum 50 words to the customer apologizing for the inconvenience and offering assistance."
+        prompt = f"Generate an appropriate empathetic response in maximum 30 words to the customer apologizing for the inconvenience and offering assistance."
 
     messages = [
         { "role": "assistant", "content": f"{feedback}\n\nQuestion: {prompt}" },
@@ -74,38 +75,10 @@ def perform_sentiment_analysis(text):
 
   result = sentiment_analyzer(text)
   return result[0]['label']
-
-def filter(text, category):
-  if category == "feedback":
-    sentiment = perform_sentiment_analysis(text)
-    # Further process the query based on sentiment
-    response = generate_response(text, sentiment)
-  else:
-    response = utils.getResponse(text)
-
-  translate_to_hindi(response)
      
-def classify_text(text):
-    result = classifier(text)
-    output_text = result[0]['label']
-    input_text = text
-    # print(f"Classification Result: {result}")
-    print(f"Text: {text}. [ Predicted Class: {result[0]['label']} ]\n")
-    filter(input_text, output_text)
 
 
-
-
-
-    
-# Function to convert text to speech
-def respond(text):
-	print("text to speak is ", text.text)
-	tts = gTTS(text=text.text, lang='hi')
-	filename = "response.mp3"
-	tts.save(filename)
-	playsound.playsound(filename)
-	os.remove(filename)  # Remove the file after playing
+##################################  START ####################################
 
 # Function to convert speech to text
 def speech_to_text():
@@ -123,23 +96,7 @@ def speech_to_text():
             messagebox.showerror("Error", "Could not understand the audio.")
         except sr.RequestError:
             messagebox.showerror("Error", "Could not request results; check your internet connection.")
-    
-# Function to translate hi text to English
-def translate_to_hindi(english):
-    text = english
-    print(english)
-    if not text:
-        messagebox.showwarning("Warning", "Please enter or speak some text to translate.")
-        return
-"""
-    translated = translator.translate(text, dest='hi')
-    output_text.config(state=tk.NORMAL)  # Enable editing
-    output_text.delete(1.0, tk.END)  # Clear the output field
-    output_text.insert(tk.END, translated.text)  # Insert translated text
-    output_text.config(state=tk.DISABLED)  # Disable editing
-    print ("English to Hindi Translation ", translated)
-    respond(translated)
-"""
+
 
 # function to translate hindi text to English
 def hi_en_translate():
@@ -156,46 +113,66 @@ def hi_en_translate():
 	# Decode the translation and print the result
 	translated_text = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
 	print ("Hindi to English Translation ", translated_text)
-	#output_text.config(state=tk.NORMAL)  # Enable editing
-	#output_text.delete(1.0, tk.END)  # Clear the output field
-	#output_text.insert(tk.END, translated_text)  # Insert translated text
-	#output_text.config(state=tk.DISABLED)  # Disable editing
-	#translate_to_hindi(translated_text)
 	classify_text(translated_text)
-
-	print("Direct Model Translation Output:", translated_text)
 	
-# def en_hi_translate(text):
-# 	tokenizer = AutoTokenizer.from_pretrained("AbhirupGhosh/opus-mt-finetuned-en-hi")
-# 	model = AutoModelForSeq2SeqLM.from_pretrained("AbhirupGhosh/opus-mt-finetuned-en-hi")
-# 	text = input_text.get().strip()
-# 
-# 	# Tokenize the input text
-# 	inputs = tokenizer(text, return_tensors="pt")
-# 
-# 	# Generate translation from model
-# 	translated_tokens = model.generate(**inputs)
-# 
-# 	# Decode the translation and print the result
-# 	translated_text = tokenizer.decode(translated_tokens[0], skip_special_tokens=True)
-# 	print ("English to Hindi Translation ", translated_text)
-# 		
-# 	return
-# 
-# 	output_text.config(state=tk.NORMAL)  # Enable editing
-# 	output_text.delete(1.0, tk.END)  # Clear the output field
-# 	output_text.insert(tk.END, translated_text)  # Insert translated text
-# 	output_text.config(state=tk.DISABLED)  # Disable editing
-# 	
-# 	respond(translated_text)
-# 
-# 	print("Direct Model Translation Output:", translated_text)
+#### Text Classification to identify Order Detail / Product Setup / Feedback ######
+def classify_text(text):
+    result = classifier(text)
+    output_text = result[0]['label']
+    input_text = text
+    # print(f"Classification Result: {result}")
+    print(f"Text: {text}. [ Predicted Class: {result[0]['label']} ]\n")
+    filter(input_text, output_text)
+
+def filter(text, category):
+  if category == "feedback":
+    sentiment = perform_sentiment_analysis(text)
+    # Further process the query based on sentiment
+    response = generate_response(text, sentiment)
+  else:
+    response = utils.getResponse(text)
+
+  translate_to_hindi_openai(response)
+
+###### Converting English Response to Hindi ######################  
+def translate_to_hindi_openai(text):
+
+	client = OpenAI(api_key=openapi_api_key)
+	response = client.chat.completions.create(
+        model="gpt-3.5-turbo",  # or "gpt-4" if you have access
+        messages=[
+            {"role": "user", "content": f"Translate the following English text to Hindi: '{text}'"}
+        ]
+    )
+    
+    
+    # Extract the translation from the response
+	translated_text=str(response.choices[0].message.content)
+	#translated_text = response['choices'][0]['message']['content']
+	print ("English to Hindi Translation openai", translated_text)
+	output_text.config(state=tk.NORMAL)  # Enable editing
+	output_text.delete(1.0, tk.END)  # Clear the output field
+	output_text.insert(tk.END, translated_text)  # Insert translated text
+	output_text.config(state=tk.DISABLED)  # Disable editing
+	respond(translated_text)
+    #return translated_text
+    
+   
+########### Convert Text to Speech ###############
+def respond(text):
+	tts = gTTS(text=text, lang='hi')
+	filename = "response.mp3"
+	tts.save(filename)
+	playsound.playsound(filename)
+	os.remove(filename)  # Remove the file after playing
 
 
 # Function to detect language
 def detect_language(text):
     detected = translator.detect(text)
     return LANGUAGES.get(detected.lang, "Unknown")
+    
+
 
 #################### UI Elements ##############################
 
