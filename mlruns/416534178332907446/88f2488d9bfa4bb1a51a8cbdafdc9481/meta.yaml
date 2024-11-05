@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/deepak/WORK/API-Driven/llm_experiments/text-to-db-search/mlruns/416534178332907446/88f2488d9bfa4bb1a51a8cbdafdc9481/artifacts
+end_time: 1730782036549
+entry_point_name: ''
+experiment_id: '416534178332907446'
+lifecycle_stage: active
+run_id: 88f2488d9bfa4bb1a51a8cbdafdc9481
+run_name: secretive-ape-351
+run_uuid: 88f2488d9bfa4bb1a51a8cbdafdc9481
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1730782035235
+status: 3
+tags: []
+user_id: deepak

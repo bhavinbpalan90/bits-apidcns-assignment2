@@ -12,8 +12,9 @@ import utils
 from datasets import Dataset
 from huggingface_hub import InferenceClient
 from transformers import AutoTokenizer, AutoModelForSequenceClassification, TrainingArguments, Trainer, pipeline
- 
-
+import mlflow
+import json
+import time
 
 import tkinter as tk
 from tkinter import scrolledtext, messagebox
@@ -39,34 +40,79 @@ client = InferenceClient(api_key="hf_XXXXXX")
 classifier = pipeline("text-classification", model='dkkh8788/finetuned_classification_model_v3',
                       tokenizer='dkkh8788/finetuned_classification_model_v3', device='mps')
 
+mlflow.set_experiment("LLMOps_Phi_Model_Tracking_Generate_Response")
 def generate_response(feedback, sentiment):
+
+    # Create a folder to save logs
+    if not os.path.exists("mlflow_logs_gen_response_msft_phi"):
+        os.makedirs("mlflow_logs_gen_response_msft_phi")
 
     if sentiment == "POSITIVE":
         prompt = f"Generate an appropriate positive response in maximum 30 words to the customer thanking and expressing gratitude."
     else:
         prompt = f"Generate an appropriate empathetic response in maximum 30 words to the customer apologizing for the inconvenience and offering assistance."
 
-    messages = [
-        { "role": "assistant", "content": f"{feedback}\n\nQuestion: {prompt}" },
-    ]
+    with mlflow.start_run():
+        try:
+            start_time = time.time()  # Record start time
+            messages = [
+                { "role": "assistant", "content": f"{feedback}\n\nQuestion: {prompt}" },
+            ]
+            output = client.chat.completions.create(
+                model="microsoft/Phi-3.5-mini-instruct",
+                messages=messages,
+                stream=True,
+                temperature=0.5,
+                max_tokens=1024,
+                top_p=0.7
+            )
  
-    output = client.chat.completions.create(
-        model="microsoft/Phi-3.5-mini-instruct",
-        messages=messages,
-        stream=True,
-        temperature=0.5,
-        max_tokens=1024,
-        top_p=0.7
-    )
+            # Collect all chunks in a list and join them after the loop
+            full_response = []
  
-    # Collect all chunks in a list and join them after the loop
-    full_response = []
+            for chunk in output:
+                full_response.append(chunk.choices[0].delta.content)
  
-    for chunk in output:
-        full_response.append(chunk.choices[0].delta.content)
+            response_text = "".join(full_response)
  
-    # Join and return the entire response as a single string
-    return ("".join(full_response))
+            # Calculate metrics
+            latency = time.time() - start_time
+            question_token_count = len(prompt.split())
+            response_token_count = len(response_text.split())
+            response_length = len(response_text)
+            estimated_cost = (question_token_count + response_token_count) * 0.00001  # hypothetical cost per token
+            print(f"{latency}, {question_token_count}")
+            # Log metrics and parameters
+            mlflow.log_param("model", "microsoft/Phi-3.5-mini-instruct")
+            mlflow.log_param("question", prompt)
+            mlflow.log_metric("latency", latency)
+            mlflow.log_metric("question_token_count", question_token_count)
+            mlflow.log_metric("response_token_count", response_token_count)
+            mlflow.log_metric("response_length", response_length)
+            mlflow.log_metric("estimated_cost", estimated_cost)
+            mlflow.log_text(response_text, "response_text.txt")
+
+            # Save logs to a local JSON file
+            log_data = {
+                "model": "microsoft/Phi-3.5-mini-instruct",
+                "question": prompt,
+                "latency": latency,
+                "question_token_count": question_token_count,
+                "response_token_count": response_token_count,
+                "response_length": response_length,
+                "estimated_cost": estimated_cost,
+                "response_text": response_text
+            }
+
+            with open(f"mlflow_logs_gen_response_msft_phi/log_{time.time()}.json", "w") as log_file:
+                json.dump(log_data, log_file)
+
+            # Join and return the entire response as a single string
+            return ("".join(full_response))
+        except Exception as e:
+            mlflow.log_metric("error", 1)  # Log error occurrence
+            mlflow.log_text(str(e), "error_message.txt")
+            return f"Error: {str(e)}"
 
 def perform_sentiment_analysis(text):  
   sentiment_analyzer = pipeline(
@@ -76,8 +122,6 @@ def perform_sentiment_analysis(text):
   result = sentiment_analyzer(text)
   return result[0]['label']
      
-
-
 ##################################  START ####################################
 
 # Function to convert speech to text
@@ -216,5 +260,3 @@ tts_engine = pyttsx3.init()
 # Configure the text-to-speech voice
 voices = tts_engine.getProperty("voices")
 tts_engine.setProperty("voice", voices[1].id)  # Select the first voice (can be customized)
-
- 

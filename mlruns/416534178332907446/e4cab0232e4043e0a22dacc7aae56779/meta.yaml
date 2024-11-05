@@ -1,0 +1,15 @@
+artifact_uri: file:///Users/deepak/WORK/API-Driven/llm_experiments/text-to-db-search/mlruns/416534178332907446/e4cab0232e4043e0a22dacc7aae56779/artifacts
+end_time: 1730781842078
+entry_point_name: ''
+experiment_id: '416534178332907446'
+lifecycle_stage: active
+run_id: e4cab0232e4043e0a22dacc7aae56779
+run_name: luxuriant-shark-922
+run_uuid: e4cab0232e4043e0a22dacc7aae56779
+source_name: ''
+source_type: 4
+source_version: ''
+start_time: 1730781840761
+status: 3
+tags: []
+user_id: deepak
